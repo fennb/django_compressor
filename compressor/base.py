@@ -87,6 +87,7 @@ class Compressor(object):
                 content = self.filter(content, "input", filename=value, elem=elem)
                 yield unicode(content, attribs.get("charset", self.charset))
 
+    @cached_property
     def concat(self):
         return "\n".join((hunk.encode(self.charset) for hunk in self.hunks))
 
@@ -103,11 +104,11 @@ class Compressor(object):
 
     @cached_property
     def combined(self):
-        return self.filter(self.concat(), 'output')
+        return self.filter(self.concat, 'output')
 
     @cached_property
     def hash(self):
-        return get_hexdigest(self.concat())[:12]
+        return get_hexdigest(self.concat)[:12]
 
     @cached_property
     def new_filepath(self):
@@ -134,6 +135,6 @@ class Compressor(object):
         if settings.COMPRESS_ENABLED:
             content = self.combined
         else:
-            content = self.concat()
+            content = self.concat
         context = dict(content=content, **self.extra_context)
         return render_to_string(self.template_name_inline, context)
